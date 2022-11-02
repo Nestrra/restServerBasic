@@ -1,70 +1,105 @@
-const { response  }= require('express')
+const { response } = require('express')
+const Usuario = require('../models/usuario')
+const bcryptjs = require('bcryptjs');
 
 
 
-const usuariosGet =  ( req, res = response)=>{
+const usuariosGet = async (req, res = response) => {
 
-    const { q, nombre, apikey } = req.query
+    const { limite = 5, desde = 0 } = req.query;
+    const query = { estado: true }
 
+    const [total, usuarios] = await Promise.all([
+
+        Usuario.countDocuments(query),
+        Usuario.find(query)
+            .skip(Number(desde))
+            .limit(Number(limite))
+
+    ])
+
+    res.json({
+        total,
+        usuarios,
+    })
+
+
+}
+
+const usuariosPost = async (req, res = response) => {
+
+    const { nombre, correo, password, role } = req.body;
+    const usuario = new Usuario({ nombre, correo, password, role });
+
+    const salt = bcryptjs.genSaltSync();
+    usuario.password = bcryptjs.hashSync(password, salt);
+
+
+
+    await usuario.save();
 
     res.json({
 
-        msg: 'get API - controlador',
-        query
+        msg: ' Post desde controlador  ',
+        usuario
+
 
     })
 
 
 }
 
-const usuariosPost = ( req, res= response )=>{
+const usuariosPut = async (req, res = response) => {
 
-    const body = req.body;
+    const { id } = req.params;
+    const { _id, password, google, correo, ...resto } = req.body;
+
+    //Validar contra base de datos
+
+    if (password) {
+
+        const salt = bcryptjs.genSaltSync();
+        resto.password = bcryptjs.hashSync(password, salt);
+
+    }
+
+    const usuario = await Usuario.findByIdAndUpdate(id, resto)
 
     res.json({
 
-        msg:' Post desde controlador  ',
-        body
-
+        msg: ' Put desde controlador',
+        usuario
 
     })
 
 
 }
 
-const usuariosPut = ( req, res= response )=>{
+const usuariosPatch = (req, res = response) => {
 
-    const id = req.params.id;
 
 
     res.json({
 
-        msg:' Put desde controlador',
-        id
+        msg: ' Patch desde controlador  '
 
     })
 
 
 }
 
-const usuariosPatch = ( req, res= response )=>{
+const usuariosDelete = async (req, res = response) => {
 
+    const { id } = req.params
 
+    //Eliminar de la base de datos
+    // const usuario = await Usuario.findByIdAndDelete(id)
 
-    res.json({
-
-        msg:' Patch desde controlador  '
-
-    })
-
-
-}
-
-const usuariosDelete = ( req, res= response )=>{
+const usuario = await Usuario.findByIdAndUpdate( id, { estado:false })
 
     res.json({
 
-        msg:' Delete desde controlador  '
+        usuario
 
     })
 
