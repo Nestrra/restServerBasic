@@ -4,8 +4,10 @@ const auth = require('../routes/auth');
 const usuarios = require('../routes/usuarios'); 
 const categorias = require('../routes/categorias'); 
 const productos = require('../routes/productos'); 
+const uploads = require('../routes/uploads'); 
 const { dbConnection } = require('../database/config');
 const  buscar  = require('../routes/buscar');
+const fileUpload = require('express-fileupload');
 
 
 
@@ -21,7 +23,8 @@ class Server {
             usuarios:  '/api/usuarios',
             categorias:'/api/categorias',
             productos:'/api/productos',
-            buscar: '/api/buscar'
+            buscar: '/api/buscar',
+            uploads: '/api/uploads'
         }
  
 
@@ -56,6 +59,12 @@ class Server {
         //Directorio publico
         this.app.use(express.static('public'));
 
+        //File - Carga de archivos
+        this.app.use(fileUpload({
+            useTempFiles : true,
+            tempFileDir : '/tmp/'
+        }));
+
     }
 
     routes() {
@@ -65,6 +74,7 @@ class Server {
         this.app.use(this.paths.auth, auth) 
         this.app.use(this.paths.productos, productos) 
         this.app.use(this.paths.buscar, buscar)
+        this.app.use(this.paths.uploads, uploads)
     
     }
 
