@@ -8,7 +8,7 @@ const { Categoria } = require('../models')
 // obtener Categorias - paginado- total - populate
 const obtenerCategorias = async (req, res = response) => {
 
-    const { limite = 5, desde = 0 } = req.query;
+    const { limite = 10, desde = 0 } = req.query;
     const query = { estado: true }
 
     const [total, categorias] = await Promise.all([
